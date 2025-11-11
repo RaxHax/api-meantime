@@ -1,0 +1,23 @@
+{
+  "name": "icelandic-mortgage-api",
+  "version": "1.0.0",
+  "description": "Firebase Functions service for Icelandic mortgage comparison API",
+  "scripts": {
+    "build": "tsc -p functions/tsconfig.json",
+    "lint": "eslint 'functions/src/**/*.{ts,tsx}'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "serve": "ts-node functions/src/index.ts",
+    "format": "prettier --write .",
+    "postinstall": "cd functions && npm install"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

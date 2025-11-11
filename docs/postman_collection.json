@@ -1,0 +1,58 @@
+{
+  "info": {
+    "name": "Icelandic Mortgage API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for Icelandic mortgage comparison service"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "All Loans",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans/all",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "loans", "all"]
+        }
+      }
+    },
+    {
+      "name": "First Buyer Loans",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans/first-buyer",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "loans", "first-buyer"]
+        }
+      }
+    },
+    {
+      "name": "Compare Loans",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans/compare?banks=Arion,Landsbankinn&metric=indexed",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "loans", "compare"],
+          "query": [
+            { "key": "banks", "value": "Arion,Landsbankinn" },
+            { "key": "metric", "value": "indexed" }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: Icelandic Mortgage Comparison API
+  version: 1.0.0
+  description: |
+    REST API exposing real-time Icelandic mortgage loan data scraped from Aurbjörg.
+servers:
+  - url: https://{region}-{project}.cloudfunctions.net/api
+    variables:
+      region:
+        default: europe-west1
+      project:
+        default: your-project-id
+paths:
+  /api/health:
+    get:
+      summary: API health probe
+      responses:
+        '200':
+          description: Healthy response
+  /api/last-update:
+    get:
+      summary: Last update timestamps
+      responses:
+        '200':
+          description: Last update metadata
+  /api/v1/loans/all:
+    get:
+      summary: List standard mortgage loans
+      responses:
+        '200':
+          description: Loan collection
+  /api/v1/loans/first-buyer:
+    get:
+      summary: List first-time buyer mortgage loans
+      responses:
+        '200':
+          description: Loan collection
+  /api/v1/loans/bank/{bankName}:
+    get:
+      summary: Loans by bank name
+      parameters:
+        - name: bankName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Filtered loan collection
+  /api/v1/loans/compare:
+    get:
+      summary: Compare loan providers
+      parameters:
+        - name: banks
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Comma separated bank names
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum:
+              - indexed
+              - nonIndexed
+              - originationFee
+      responses:
+        '200':
+          description: Comparison payload
+  /api/v1/loans/best-rate:
+    get:
+      summary: Best loan rate
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - indexed
+              - non-indexed
+      responses:
+        '200':
+          description: Best rate provider
+  /api/v1/loans/export:
+    get:
+      summary: Export loans to CSV or JSON
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum:
+              - json
+              - csv
+        - name: firstBuyer
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Exported dataset
+  /api/v1/loans/history:
+    get:
+      summary: Loan history snapshots
+      parameters:
+        - name: bank
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historical records
+  /api/v1/webhooks:
+    post:
+      summary: Register webhook subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                secret:
+                  type: string
+      responses:
+        '201':
+          description: Subscription created
+  /api/v1/webhooks/test:
+    post:
+      summary: Trigger webhook deliveries manually
+      responses:
+        '200':
+          description: Delivery summary
+  /api/v1/graphql:
+    post:
+      summary: GraphQL endpoint
+      responses:
+        '200':
+          description: GraphQL response
+components:
+  schemas:
+    LoanProvider:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: string
+        year:
+          type: integer
+        ltvPercentage:
+          type: number
+        originationFee:
+          type: number
+        rates:
+          type: object
+          properties:
+            nonIndexedVariable:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            nonIndexedFixed3yr:
+              type: number
+            nonIndexedFixed5yr:
+              type: number
+            indexedVariable:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            indexedFixed:
+              type: number
+        prepaymentFee:
+          type: number
+        loanType:
+          type: string
+        isFirstBuyer:
+          type: boolean
+        lastUpdated:
+          type: string
+          format: date-time
