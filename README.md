@@ -33,7 +33,7 @@ docs/
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - Firebase CLI (`npm install -g firebase-tools`)
 - Playwright dependencies (`npx playwright install --with-deps`)
 
