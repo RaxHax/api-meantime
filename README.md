@@ -56,14 +56,7 @@ The service is controlled via environment variables or Firebase config:
 
 Configure the variables locally via `.env` or in Firebase using
 `firebase functions:config:set key=value` (CLI automatically injects them as runtime environment
-variables). When exporting values for a one-off deploy, remember that Windows shells use a different
-syntax than Unix shells:
-
-| Shell | Example |
-| --- | --- |
-| macOS/Linux (`bash`, `zsh`) | `export FUNCTION_REGION=europe-west1` |
-| Windows Command Prompt | `set FUNCTION_REGION=europe-west1` |
-| Windows PowerShell | `$env:FUNCTION_REGION = "europe-west1"` |
+variables).
 
 ## Installation
 
@@ -93,7 +86,6 @@ npm install
 ```bash
 cd functions
 npm run build
-cd ..
 firebase deploy --only functions:api,functions:scheduledScrape
 ```
 
@@ -128,11 +120,6 @@ The deploy command provisions:
 - **Playwright fails inside Cloud Functions** – Make sure the function memory is at least `1GB`
   and `npx playwright install --with-deps` has been run before deployment so the browsers are
   packaged.
-- **`firebase deploy` errors while enabling services (HTTP 429)** – The first deployment needs the
-  Cloud Functions, Cloud Build, and Artifact Registry APIs. You can pre-enable them once via the
-  Google Cloud Console or by running `gcloud services enable cloudfunctions.googleapis.com \
-  cloudbuild.googleapis.com artifactregistry.googleapis.com`. If the CLI still reports a 429, wait
-  a minute and re-run the deploy; the service enablement is cached once it succeeds.
 - **Cache reads return empty** – Confirm Firestore security rules allow the Cloud Function service
   account to read/write the `RATE_COLLECTION` and that the scheduled scraper has executed at least
   once.

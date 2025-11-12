@@ -35,26 +35,16 @@ npx playwright install --with-deps
 The HTTPS function and scheduler use shared runtime options from `functions/src/config/index.ts`.
 Set overrides via environment variables (locally through `.env` or when deploying):
 
-| Shell | Example |
-| --- | --- |
-| macOS/Linux (`bash`, `zsh`) | `export FUNCTION_REGION=europe-west1` |
-| Windows Command Prompt | `set FUNCTION_REGION=europe-west1` |
-| Windows PowerShell | `$env:FUNCTION_REGION = "europe-west1"` |
-
-Repeat for `FUNCTION_MEMORY` and `FUNCTION_TIMEOUT`, or store the values in a `.env` file.
+```bash
+export FUNCTION_REGION=europe-west1
+export FUNCTION_MEMORY=1GB
+export FUNCTION_TIMEOUT=120
+```
 
 ## 5. Deploy
 
 ```bash
-cd ..
 firebase deploy --only functions:api,functions:scheduledScrape
-```
-
-If this is your first deploy on a project, pre-enable the required Google Cloud APIs to avoid the
-CLI needing to do it during deploy (which can hit per-minute quotas):
-
-```bash
-gcloud services enable cloudfunctions.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
 ```
 
 If you need to redeploy only the API without the scheduler:
