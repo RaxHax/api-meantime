@@ -5,8 +5,9 @@
     "endpoints": {
       "api": {
         "entryPoint": "api",
-        "httpsTrigger": {},
-        "invoker": "public"
+        "httpsTrigger": {
+          "invoker": ["public"]
+        }
       }
     },
     "ignore": [
