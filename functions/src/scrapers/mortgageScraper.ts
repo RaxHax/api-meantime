@@ -1,4 +1,5 @@
-import { chromium, Browser } from 'playwright';
+import chromium from '@sparticuz/chromium';
+import { chromium as playwrightChromium, Browser } from 'playwright-core';
 import { logger } from '../utils/logger';
 import { parseLoanProviders, RawLoanRow } from '../utils/dataParser';
 import { ScrapeResult } from '../utils/types';
@@ -49,17 +50,17 @@ const extractTableRows = async (browser: Browser, firstBuyer: boolean): Promise<
             name: textContent(0) ?? 'Óþekkt',
             logoUrl: img?.getAttribute('src') ?? '',
             year: textContent(1),
-          ltvPercentage: textContent(2),
-          originationFee: textContent(3),
-          nonIndexedVariable: textContent(4),
-          nonIndexedFixed3yr: textContent(5),
-          nonIndexedFixed5yr: textContent(6),
-          indexedVariable: textContent(7),
-          indexedFixed: textContent(8),
-          prepaymentFee: textContent(9),
-          loanType: textContent(10),
-          isFirstBuyer: firstBuyerFlag
-        };
+            ltvPercentage: textContent(2),
+            originationFee: textContent(3),
+            nonIndexedVariable: textContent(4),
+            nonIndexedFixed3yr: textContent(5),
+            nonIndexedFixed5yr: textContent(6),
+            indexedVariable: textContent(7),
+            indexedFixed: textContent(8),
+            prepaymentFee: textContent(9),
+            loanType: textContent(10),
+            isFirstBuyer: firstBuyerFlag
+          };
         }),
       firstBuyer,
     );
@@ -67,6 +68,26 @@ const extractTableRows = async (browser: Browser, firstBuyer: boolean): Promise<
   } finally {
     await context.close();
   }
+};
+
+const launchBrowser = async (): Promise<Browser> => {
+  if (process.env.FUNCTIONS_EMULATOR === 'true' || process.env.USE_LOCAL_PLAYWRIGHT === 'true') {
+    const { chromium: devChromium } = await import('playwright');
+    return devChromium.launch({
+      headless: config.scraping.headless,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+  }
+
+  const executablePath = await chromium.executablePath();
+  const launchArgs = chromium.args.includes('--disable-dev-shm-usage')
+    ? chromium.args
+    : [...chromium.args, '--disable-dev-shm-usage'];
+  return playwrightChromium.launch({
+    args: launchArgs,
+    executablePath: executablePath ?? undefined,
+    headless: config.scraping.headless ?? chromium.headless
+  });
 };
 
 export const scrapeLoans = async ({
@@ -80,10 +101,7 @@ export const scrapeLoans = async ({
     attempt += 1;
     let browser: Browser | undefined;
     try {
-      browser = await chromium.launch({
-        headless: config.scraping.headless,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+      browser = await launchBrowser();
 
       const rows = await extractTableRows(browser, firstBuyer);
       const providers = parseLoanProviders(rows, scrapedAt);
