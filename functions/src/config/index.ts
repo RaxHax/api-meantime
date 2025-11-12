@@ -7,5 +7,10 @@ export const config = {
     url: 'https://aurbjorg.is/samanburdur/husnaedislan',
     maxRetries: Number(process.env.SCRAPER_MAX_RETRIES ?? '3'),
     headless: process.env.PLAYWRIGHT_HEADLESS !== 'false'
+  },
+  runtime: {
+    region: process.env.FUNCTION_REGION ?? 'europe-west1',
+    timeoutSeconds: Number(process.env.FUNCTION_TIMEOUT ?? '120'),
+    memory: process.env.FUNCTION_MEMORY ?? '1GB'
   }
 };

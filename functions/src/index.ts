@@ -1,64 +1,27 @@
-import express from 'express';
-import compression from 'compression';
-import cors from 'cors';
-import helmet from 'helmet';
 import * as functions from 'firebase-functions';
 import admin from 'firebase-admin';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServer } from '@apollo/server';
-import bodyParser from 'body-parser';
-import { cacheMiddleware } from './middleware/cache';
-import { requestLimiter } from './middleware/rateLimit';
-import {
-  compareLoanProviders,
-  getAllLoans,
-  getBestRate,
-  exportLoans,
-  getFirstBuyerLoans,
-  getHealth,
-  getLastUpdate,
-  getLoansByBank,
-  getHistoryTimeline
-} from './controllers/loanController';
-import { logger } from './utils/logger';
-import { resolvers, typeDefs } from './graphql/schema';
-import { registerWebhook, triggerRateChange } from './services/webhookService';
+import { createApp } from './http/app';
 import { scheduleScrape } from './services/scheduler';
+import { logger } from './utils/logger';
+import { config } from './config';
 
-admin.initializeApp();
+type MemoryOption = '128MB' | '256MB' | '512MB' | '1GB' | '2GB' | '4GB' | '8GB';
 
-const app = express();
-app.use(helmet());
-app.use(compression());
-app.use(cors({ origin: true }));
-app.use(bodyParser.json());
-app.use(requestLimiter);
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
-app.get('/api/health', getHealth);
-app.get('/api/last-update', getLastUpdate);
-app.get('/api/v1/loans/all', cacheMiddleware, getAllLoans);
-app.get('/api/v1/loans/first-buyer', cacheMiddleware, getFirstBuyerLoans);
-app.get('/api/v1/loans/bank/:bankName', getLoansByBank);
-app.get('/api/v1/loans/compare', compareLoanProviders);
-app.get('/api/v1/loans/best-rate', getBestRate);
-app.get('/api/v1/loans/export', exportLoans);
-app.get('/api/v1/loans/history', getHistoryTimeline);
+const app = createApp();
+const runtimeMemory = (config.runtime.memory ?? '1GB') as MemoryOption;
 
-app.post('/api/v1/webhooks', registerWebhook);
-app.post('/api/v1/webhooks/test', triggerRateChange);
+export const api = functions
+  .region(config.runtime.region)
+  .runWith({
+    timeoutSeconds: config.runtime.timeoutSeconds,
+    memory: runtimeMemory
+  })
+  .https.onRequest(app);
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers
-});
-
-const startServer = server.start();
-app.use('/api/v1/graphql', async (req, res, next) => {
-  await startServer;
-  return expressMiddleware(server)(req, res, next);
-});
-
-export const api = functions.https.onRequest(app);
 export const scheduledScrape = scheduleScrape();
 
 process.on('unhandledRejection', (reason) => {
