@@ -2,12 +2,13 @@ import NodeCache from 'node-cache';
 import { firestore } from 'firebase-admin';
 import { LoanProvider } from '../utils/types';
 import { logger } from '../utils/logger';
+import { config } from '../config';
 
 const TTL_SECONDS = 15 * 60;
 const cache = new NodeCache({ stdTTL: TTL_SECONDS });
 
 const db = () => firestore();
-const COLLECTION_NAME = 'loans_cache';
+const COLLECTION_NAME = config.firestore.rateCollection;
 
 interface CacheRecord {
   key: string;
