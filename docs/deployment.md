@@ -29,6 +29,10 @@
    ```bash
    firebase deploy --only functions:api,functions:scheduledScrape
    ```
+   The `firebase.json` configuration marks the `api` endpoint as `public`,
+   so each deploy automatically re-applies the "Allow unauthenticated"
+   invoker binding. If the function was deployed previously without that
+   permission, rerun the command above to update its IAM policy.
 
 6. **Deploy Firestore rules**
    ```bash
